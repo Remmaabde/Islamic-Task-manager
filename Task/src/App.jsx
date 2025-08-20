@@ -1,11 +1,11 @@
 import './App.css'
-import TaskForm from './components/Layout/Task/TaskForm';
+import TaskApp from './components/Task/TaskApp';
 function App() {
   
 
   return (
     <>
-      <TaskForm/>
+      <TaskApp/>
     </>
   )
 }

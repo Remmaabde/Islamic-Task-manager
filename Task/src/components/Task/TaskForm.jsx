@@ -1,25 +1,18 @@
 import React, { useState } from "react";
-//import "./TaskForm.css"; // import the CSS file
 
-export default function TaskForm() {
-const [title, setTitle] = useState("");
-const [description, setDescription] = useState("");
-const [dueDate, setDueDate] = useState("");
+export default function TaskForm({ onSubmit }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
 const [priority, setPriority] = useState("Low");
 
 const handleSubmit = (e) => {
     e.preventDefault();
 
-    const taskData = {
-    title,
-    description,
-    dueDate,
-    priority,
-    };
+    // send data to parent (TaskApp)
+    onSubmit({ title, description, dueDate, priority });
 
-    console.log("Task Created:", taskData);
-
-    // Reset form after submit
+    // reset form
     setTitle("");
     setDescription("");
     setDueDate("");
@@ -28,8 +21,6 @@ const handleSubmit = (e) => {
 
 return (
     <form className="task-form" onSubmit={handleSubmit}>
-    <h2>📿Islamic Task Manager</h2>
-
     <label>
         Title (required):
         <input
@@ -59,16 +50,17 @@ return (
 
     <label>
         Priority:
-        <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+        <select
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
+        >
         <option value="Low">Low</option>
         <option value="Medium">Medium</option>
         <option value="High">High</option>
         </select>
     </label>
 
-    <button type="submit">Add Task </button>
+    <button type="submit">Add Task</button>
     </form>
 );
-};
-
-
+}

@@ -7,20 +7,17 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
-
 .task-form h2 {
   text-align: center;
   margin-bottom: 1rem;
   color: #1c3d3a;
 }
-
 .task-form label {
   display: block;
   margin-bottom: 1rem;
   color: #333;
   font-weight: 500;
 }
-
 .task-form input,
 .task-form textarea,
 .task-form select {
@@ -33,14 +30,12 @@
   font-size: 0.95rem;
   transition: border 0.2s ease-in-out;
 }
-
 .task-form input:focus,
 .task-form textarea:focus,
 .task-form select:focus {
   border: 1px solid #00796b;
   box-shadow: 0 0 4px rgba(0, 121, 107, 0.4);
 }
-
 .task-form button {
   display: block;
   width: 100%;
@@ -55,7 +50,6 @@
   cursor: pointer;
   transition: background 0.3s ease-in-out;
 }
-
 .task-form button:hover {
   background: #004d40;
 }
