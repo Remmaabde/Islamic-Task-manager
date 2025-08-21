@@ -1,40 +1,31 @@
 import React, { useState } from "react";
 import TaskForm from "./TaskForm";
+import TaskCard from "./TaskCard";
 
 export default function TaskApp() {
-  // Manage task list state
 const [tasks, setTasks] = useState([]);
 
-  // Handle new task submissions
 const handleAddTask = (taskData) => {
     const newTask = {
-      id: Date.now(), // unique id
-      ...taskData,    // spread the form data based on their ..(title, desc, date, priority)
-      completed: false, // default status
+    id: Date.now(),
+    ...taskData,
+    completed: false,
     };
-
-    // add new task to the top of the list
     setTasks([newTask, ...tasks]);
-
-    // update in console
-    console.log("Updated Task List:", [newTask, ...tasks]);
 };
 
 return (
-    <div>
-    <h1>📿 Islamic Task Manager</h1>
+    <div className="p-6">
+    <h1 className="text-3xl font-bold mb-4">📿 Islamic Task Manager</h1>
 
-      {/* Pass down the handleAddTask function */}
     <TaskForm onSubmit={handleAddTask} />
 
-    {/*Render tasks*/}
-    <ul>
+      {/* Task listing using map() Js(built-in) */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {tasks.map((task) => (
-        <li key={task.id}>
-            <strong>{task.title}</strong> – {task.description} (Due: {task.dueDate}) | Priority: {task.priority}
-        </li>
+          <TaskCard key={task.id} task={task} />
         ))}
-    </ul>
+      </div>
     </div>
-);
+  );
 }
