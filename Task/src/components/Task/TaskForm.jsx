@@ -1,66 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export default function TaskForm({ onSubmit }) {
+export default function TaskForm({ onSubmit, initialTask, onCancel }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
-const [priority, setPriority] = useState("Low");
+  const [priority, setPriority] = useState("Low");
 
-const handleSubmit = (e) => {
+  // Populate form when editing
+  useEffect(() => {
+    if (initialTask) {
+      setTitle(initialTask.title);
+      setDescription(initialTask.description);
+      setDueDate(initialTask.dueDate);
+      setPriority(initialTask.priority);
+    } else {
+      setTitle("");
+      setDescription("");
+      setDueDate("");
+      setPriority("Low");
+    }
+  }, [initialTask]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+    onSubmit({
+      id: initialTask ? initialTask.id : undefined,
+      title,
+      description,
+      dueDate,
+      priority,
+      completed: initialTask ? initialTask.completed : false,
+    });
+  };
 
-    // send data to parent (TaskApp)
-    onSubmit({ title, description, dueDate, priority });
-
-    // reset form
-    setTitle("");
-    setDescription("");
-    setDueDate("");
-    setPriority("Low");
-};
-
-return (
+  return (
     <form className="task-form" onSubmit={handleSubmit}>
-    <label>
+      <label>
         Title (required):
-        <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-        />
-    </label>
+        <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+      </label>
 
-    <label>
+      <label>
         Description (optional):
-        <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        ></textarea>
-    </label>
+        <textarea value={description} onChange={e => setDescription(e.target.value)}></textarea>
+      </label>
 
-    <label>
+      <label>
         Due Date:
-        <input
-        type="date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-        />
-    </label>
+        <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+      </label>
 
-    <label>
+      <label>
         Priority:
-        <select
-        value={priority}
-        onChange={(e) => setPriority(e.target.value)}
-        >
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
+        <select value={priority} onChange={e => setPriority(e.target.value)}>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
         </select>
-    </label>
+      </label>
 
-    <button type="submit">Add Task</button>
+      <button type="submit">{initialTask ? "Update Task" : "Add Task"}</button>
+      {initialTask && <button type="button" onClick={onCancel}>Cancel</button>}
     </form>
-);
+  );
 }
