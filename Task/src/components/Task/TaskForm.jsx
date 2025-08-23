@@ -6,7 +6,7 @@ export default function TaskForm({ onSubmit, initialTask, onCancel }) {
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("Low");
 
-  // Populate form when editing
+  // Populate it 
   useEffect(() => {
     if (initialTask) {
       setTitle(initialTask.title);
