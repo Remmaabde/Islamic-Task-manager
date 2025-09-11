@@ -1,10 +1,13 @@
 import React, { useState, useMemo } from "react";
 import TaskForm from "./TaskForm";
 import TaskCard from "./TaskCard";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useFetch } from "./hooks/useFetch";
 
 export default function TaskApp() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useLocalStorage("tasks", []);
   const [editingTask, setEditingTask] = useState(null);
+  const { data: quote, loading, error } = useFetch("https://api.quotable.io/random?tags=inspirational");
 
   // Derived state: are all tasks completed and there is at least one task?
   const allCompleted = useMemo(() => {
@@ -45,6 +48,28 @@ export default function TaskApp() {
   return (
     <div className="p-6 max-w-5xl mx-auto font-sans">
       <h1 className="text-3xl font-bold mb-6 text-center text-purple-800">📿 Islamic Task Manager</h1>
+
+      {/* this will Display Islamic Quote */}
+      <div className="mb-6 p-4 bg-blue-100 rounded text-center">
+        {loading ? (
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+        ) : error ? (
+          <div className="text-red-600">
+            Failed to load quote.{" "}
+            <button
+              onClick={() => window.location.reload()}
+              className="underline text-blue-600"
+            >
+              Retry
+            </button>
+          </div>
+        ) : (
+          <p className="text-gray-800 italic">
+            "{quote?.content || 'Seek knowledge from the cradle to the grave.'}" -{" "}
+            {quote?.author || "Islamic Proverb"}
+          </p>
+        )}
+      </div>
 
       <TaskForm
         onSubmit={handleAddTask}
