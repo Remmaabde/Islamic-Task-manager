@@ -1,4 +1,4 @@
-import './App.css'
+//import './index.css';
 import TaskApp from './components/Task/TaskApp';
 import Header from './components/Layout/Header';
 function App() {
