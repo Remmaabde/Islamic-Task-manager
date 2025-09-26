@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../index.css";
+
 export default function TaskForm({ onSubmit, initialTask, onCancel }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -41,7 +41,7 @@ export default function TaskForm({ onSubmit, initialTask, onCancel }) {
 
   return (
     <form
-      className="space-y-4 bg-white p-6 rounded-xl shadow-md border border-gray-200"
+      className="space-y-4 bg-white p-4 md:p-6 rounded-xl shadow-md border border-gray-200"
       onSubmit={handleSubmit}
     >
       {error && <div className="text-red-600 text-sm font-semibold">{error}</div>}
@@ -90,10 +90,10 @@ export default function TaskForm({ onSubmit, initialTask, onCancel }) {
         </select>
       </label>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <button
           type="submit"
-          className="bg-green text-black px-4 py-2 rounded hover:bg-green-700"
+          className="flex-1 bg-islamicGreen text-white px-4 py-2 rounded hover:bg-green-700 focus:ring-2 focus:ring-green-400"
         >
           {initialTask ? "Update Task" : "Add Task"}
         </button>
@@ -101,7 +101,7 @@ export default function TaskForm({ onSubmit, initialTask, onCancel }) {
           <button
             type="button"
             onClick={onCancel}
-            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+            className="flex-1 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 focus:ring-2 focus:ring-gray-400"
           >
             Cancel
           </button>
