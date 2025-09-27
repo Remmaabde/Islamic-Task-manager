@@ -1,15 +1,13 @@
-//import './index.css';
-import TaskApp from './components/Task/TaskApp';
-import Header from './components/Layout/Header';
-function App() {
-  
+import Header from "./components/Layout/Header";
+import TaskApp from "./components/Task/TaskApp";
 
+function App() {
   return (
     <>
-    <Header/>
-      <TaskApp/>
+      <Header />
+      <TaskApp />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
