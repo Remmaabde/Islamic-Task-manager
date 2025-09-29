@@ -85,7 +85,7 @@ export default function Home() {
 
         {/* Call to Action Button */}
         <motion.a
-          href="/incompleted"
+          href="/Incompleted"
           whileHover={{
             scale: 1.1,
             boxShadow: "0 8px 25px rgba(16, 185, 129, 0.4)",
