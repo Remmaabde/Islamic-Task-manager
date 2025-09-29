@@ -56,7 +56,7 @@ export default function Incompleted() {
             transition={{ delay: 0.3 }}
             className="text-gray-600 text-center text-lg"
           >
-            All tasks are completed, mashaAllah! 🌙
+            All tasks are completed, ma sha Allah! 🌙
           </motion.p>
         ) : (
           <motion.div

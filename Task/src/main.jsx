@@ -6,7 +6,7 @@ import "./index.css";
 import Layout from "./components/Layout/Layout";
 import Home from "./pages/Home";
 import Tasks from "./pages/Tasks";
-import Completed from "./pages/completed";
+import Completed from "./pages/Completed";
 import Incompleted from "./pages/Incompleted";
 
 const router = createBrowserRouter([
