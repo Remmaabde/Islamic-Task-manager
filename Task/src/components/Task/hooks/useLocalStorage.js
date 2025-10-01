@@ -1,14 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-export default function useLocalStorage(key, initialValue) {
-  const [value, setValue] = useState(() => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : initialValue;
+export function useLocalStorage(key, initialValue) {
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      return initialValue;
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
+    try {
+      window.localStorage.setItem(key, JSON.stringify(storedValue));
+    // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      // Handle error silently
+    }
+  }, [key, storedValue]);
 
-  return [value, setValue];
+  return [storedValue, setStoredValue];
 }

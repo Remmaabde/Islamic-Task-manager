@@ -1,109 +1,199 @@
-import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion"; // For animations
-import TaskCard from "./TaskCard";
-import TaskForm from "./TaskForm";
-import useLocalStorage from "./hooks/useLocalStorage";
+import { useState } from 'react';
+import { Plus, Filter, Search, Loader, AlertCircle } from 'lucide-react';
+import { taskAPI } from '../../services/api'
+import { useFetch } from '../../components/Task/hooks/useFetch';
+import { useLocalStorage } from '../../components/Task/hooks/useLocalStorage';
+import TaskCard from './TaskCard';
+import AddTaskModal from './AddTaskModal';
 
 export default function TaskApp() {
-  const [tasks, setTasks] = useLocalStorage("tasks", []);
-  const [editingTask, setEditingTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [filterStatus, setFilterStatus] = useLocalStorage('taskFilter', 'all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPriority, setSelectedPriority] = useLocalStorage('priorityFilter', 'all');
 
-  const allCompleted = useMemo(
-    () => tasks.length > 0 && tasks.every((t) => t.completed),
-    [tasks]
+  const { data: tasks, loading, error, refetch } = useFetch(
+    () => taskAPI.getAllTasks(),
+    []
   );
 
-  const handleAddTask = (taskData) => {
-    if (editingTask) {
-      setTasks(tasks.map(t => t.id === editingTask.id ? { ...t, ...taskData } : t));
+  const handleAddTask = async (newTask) => {
+    try {
+      if (editingTask) {
+        await taskAPI.updateTask(editingTask.id, newTask);
+      } else {
+        await taskAPI.createTask(newTask);
+      }
+      refetch();
       setEditingTask(null);
-    } else {
-      const newTask = { ...taskData, id: Date.now(), completed: false };
-      setTasks([newTask, ...tasks]);
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      // Handle error
     }
-    setIsModalOpen(false);
   };
 
-  const handleToggleComplete = (id) =>
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  const handleToggleComplete = async (id, completed) => {
+    try {
+      await taskAPI.toggleComplete(id, completed);
+      refetch();
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      // Handle error
+    }
+  };
 
-  const handleDeleteTask = (id) => setTasks(tasks.filter(t => t.id !== id));
+  const handleDeleteTask = async (id) => {
+    try {
+      await taskAPI.deleteTask(id);
+      refetch();
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      // Handle error
+    }
+  };
+
   const handleEditTask = (task) => {
     setEditingTask(task);
     setIsModalOpen(true);
   };
-  const handleCancelEdit = () => {
-    setEditingTask(null);
+
+  const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditingTask(null);
+  };
+
+  const filteredTasks = tasks?.filter((task) => {
+    const matchesStatus =
+      filterStatus === 'all' ||
+      (filterStatus === 'active' && !task.completed) ||
+      (filterStatus === 'completed' && task.completed);
+
+    const matchesSearch =
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesPriority = selectedPriority === 'all' || task.priority === selectedPriority;
+
+    return matchesStatus && matchesSearch && matchesPriority;
+  });
+
+  const stats = {
+    total: tasks?.length || 0,
+    active: tasks?.filter((t) => !t.completed).length || 0,
+    completed: tasks?.filter((t) => t.completed).length || 0,
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-200">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-islamicGreen">📿 Islamic Task Manager</h1>
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 5, boxShadow: "0 5px 15px rgba(16, 185, 129, 0.4)" }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400 }}
-          onClick={() => setIsModalOpen(true)}
-          className="bg-islamicGreen text-white px-4 py-2 rounded-lg shadow-lg hover:bg-green-700 transition-colors"
-        >
-          ➕ Add Task
-        </motion.button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8 bg-white rounded-2xl shadow-lg p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <p className="text-sm font-medium opacity-90">Total Tasks</p>
+              <p className="text-3xl font-bold mt-1">{stats.total}</p>
+            </div>
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <p className="text-sm font-medium opacity-90">Active</p>
+              <p className="text-3xl font-bold mt-1">{stats.active}</p>
+            </div>
+            <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl p-5 text-white transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <p className="text-sm font-medium opacity-90">Completed</p>
+              <p className="text-3xl font-bold mt-1">{stats.completed}</p>
+            </div>
+          </div>
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
-          >
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              transition={{ type: "spring", bounce: 0.4 }}
-              className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg"
-            >
-              <TaskForm
-                onSubmit={handleAddTask}
-                initialTask={editingTask}
-                onCancel={handleCancelEdit}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search tasks..."
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-300 outline-none"
               />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
 
-      {tasks.length === 0 ? (
-        <div className="mt-12 text-center text-xl text-gray-600">
-          Start by adding your first task!
+            <div className="flex gap-2">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-300 outline-none bg-white"
+              >
+                <option value="all">All Tasks</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+              </select>
+
+              <select
+                value={selectedPriority}
+                onChange={(e) => setSelectedPriority(e.target.value)}
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-300 outline-none bg-white"
+              >
+                <option value="all">All Priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
         </div>
-      ) : allCompleted ? (
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", bounce: 0.5 }}
-          className="mt-12 p-4 bg-green-100 text-green-800 rounded-lg text-xl font-semibold text-center shadow-lg"
+
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="fixed bottom-8 right-8 z-40 flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full shadow-2xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-300 transform hover:scale-110 hover:shadow-emerald-300/50 focus:outline-none focus:ring-4 focus:ring-emerald-400 group"
         >
-          🌙 Keep up the good work!
-        </motion.div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tasks.map(task => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onToggleComplete={() => handleToggleComplete(task.id)}
-              onDelete={() => handleDeleteTask(task.id)}
-              onEdit={() => handleEditTask(task)}
-            />
-          ))}
-        </div>
-      )}
+          <Plus className="w-6 h-6 transition-transform duration-300 group-hover:rotate-90" />
+          <span className="font-semibold text-lg">Add Task</span>
+        </button>
+
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader className="w-12 h-12 text-emerald-600 animate-spin" />
+            <p className="mt-4 text-gray-600 font-medium">Loading tasks...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="flex flex-col items-center justify-center py-20 bg-red-50 rounded-2xl">
+            <AlertCircle className="w-12 h-12 text-red-600" />
+            <p className="mt-4 text-red-600 font-medium">Error loading tasks: {error}</p>
+          </div>
+        )}
+
+        {!loading && !error && filteredTasks && filteredTasks.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl">
+            <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+              <Filter className="w-12 h-12 text-emerald-600" />
+            </div>
+            <p className="text-gray-600 font-medium text-lg">No tasks found</p>
+            <p className="text-gray-500 text-sm mt-2">Try adjusting your filters or create a new task</p>
+          </div>
+        )}
+
+        {!loading && !error && filteredTasks && filteredTasks.length > 0 && (
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+            {filteredTasks.map((task) => (
+              <div key={task.id} className="break-inside-avoid">
+                <TaskCard
+                  task={task}
+                  onToggleComplete={handleToggleComplete}
+                  onDelete={handleDeleteTask}
+                  onEdit={handleEditTask}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <AddTaskModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleAddTask}
+          editingTask={editingTask}
+        />
+      </div>
     </div>
   );
 }
