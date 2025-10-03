@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 export function useFetch(fetchFn, dependencies = []) {
   const [data, setData] = useState(null);
@@ -24,7 +24,7 @@ export function useFetch(fetchFn, dependencies = []) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'An error occurred');
+          setError(err instanceof Error ? err.message : "An error occurred");
         }
       } finally {
         if (!cancelled) {
@@ -40,5 +40,5 @@ export function useFetch(fetchFn, dependencies = []) {
     };
   }, [...dependencies, refetchKey]);
 
-  return { data, loading, error, refetch };
+  return { data, setData, loading, error, refetch };
 }

@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Plus, Filter, Search, Loader, AlertCircle } from 'lucide-react';
-import { taskAPI } from '../../services/api'
-import { useFetch } from '../../components/Task/hooks/useFetch';
+import { useState, useEffect } from 'react';
+import { Plus, Filter, Search } from 'lucide-react';
+import { taskAPI } from '../../services/api';
 import { useLocalStorage } from '../../components/Task/hooks/useLocalStorage';
 import TaskCard from './TaskCard';
 import AddTaskModal from './AddTaskModal';
+import QuranAyah from '../QuranAyah';
 
 export default function TaskApp() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,11 +12,16 @@ export default function TaskApp() {
   const [filterStatus, setFilterStatus] = useLocalStorage('taskFilter', 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPriority, setSelectedPriority] = useLocalStorage('priorityFilter', 'all');
+  const [tasks, setTasks] = useState([]);
 
-  const { data: tasks, loading, error, refetch } = useFetch(
-    () => taskAPI.getAllTasks(),
-    []
-  );
+  const loadTasks = async () => {
+    const allTasks = await taskAPI.getAllTasks();
+    setTasks(allTasks);
+  };
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
 
   const handleAddTask = async (newTask) => {
     try {
@@ -25,9 +30,8 @@ export default function TaskApp() {
       } else {
         await taskAPI.createTask(newTask);
       }
-      refetch();
+      loadTasks();
       setEditingTask(null);
-    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       // Handle error
     }
@@ -36,8 +40,7 @@ export default function TaskApp() {
   const handleToggleComplete = async (id, completed) => {
     try {
       await taskAPI.toggleComplete(id, completed);
-      refetch();
-    // eslint-disable-next-line no-unused-vars
+      loadTasks();
     } catch (err) {
       // Handle error
     }
@@ -46,8 +49,7 @@ export default function TaskApp() {
   const handleDeleteTask = async (id) => {
     try {
       await taskAPI.deleteTask(id);
-      refetch();
-    // eslint-disable-next-line no-unused-vars
+      loadTasks();
     } catch (err) {
       // Handle error
     }
@@ -87,6 +89,8 @@ export default function TaskApp() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
       <div className="container mx-auto px-4 py-8">
+        <QuranAyah />
+
         <div className="mb-8 bg-white rounded-2xl shadow-lg p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
@@ -148,21 +152,7 @@ export default function TaskApp() {
           <span className="font-semibold text-lg">Add Task</span>
         </button>
 
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader className="w-12 h-12 text-emerald-600 animate-spin" />
-            <p className="mt-4 text-gray-600 font-medium">Loading tasks...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="flex flex-col items-center justify-center py-20 bg-red-50 rounded-2xl">
-            <AlertCircle className="w-12 h-12 text-red-600" />
-            <p className="mt-4 text-red-600 font-medium">Error loading tasks: {error}</p>
-          </div>
-        )}
-
-        {!loading && !error && filteredTasks && filteredTasks.length === 0 && (
+        {filteredTasks && filteredTasks.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl">
             <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
               <Filter className="w-12 h-12 text-emerald-600" />
@@ -172,7 +162,7 @@ export default function TaskApp() {
           </div>
         )}
 
-        {!loading && !error && filteredTasks && filteredTasks.length > 0 && (
+        {filteredTasks && filteredTasks.length > 0 && (
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {filteredTasks.map((task) => (
               <div key={task.id} className="break-inside-avoid">
